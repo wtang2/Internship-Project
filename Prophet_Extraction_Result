@@ -1,6 +1,6 @@
-'***************************************************************************************************
-'Objective: Allow users to extract prophet result for different 'sheet by just 'clicking a button
-'***************************************************************************************************
+'************************************************************************************************************
+'Objective: Allow users to extract prophet result for different spreadsheetsheet by just 'clicking a button
+'************************************************************************************************************
 
 Private Sub CommandButton2_Click()
 
