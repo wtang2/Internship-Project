@@ -4,4 +4,4 @@ by just clicking a button.
 Users just need to input file location, file name and policy information
 
 # Prophet Extraction Macro
-Allow users to extract prophet result for different spreadsheetsheet by just 'clicking a button
+Allow users to extract prophet result for different spreadsheet by just 'clicking a button
