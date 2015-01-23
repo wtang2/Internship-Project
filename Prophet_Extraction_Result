@@ -1,0 +1,113 @@
+'***************************************************************************************************
+'Objective: Allow users to extract prophet result for different 'sheet by just 'clicking a button
+'***************************************************************************************************
+
+Private Sub CommandButton2_Click()
+
+Sheets("macro").Range("C14:E18").Value = ""
+Sheets("SummExtraction_HS").EnableCalculation = False
+Sheets("SummExtraction_IL").EnableCalculation = False
+Sheets("SummExt_IL_SPSource code").EnableCalculation = False
+    
+' Set "Start" to not trigger the extraction
+' -----------------------------------------
+Sheets("repdate").Range("I20").Value = 0
+              
+For i = 1 To 5
+
+    ' Update extraction status
+    ' ------------------------
+    Application.ScreenUpdating = True
+    Sheets("macro").Activate                Sheets("macro").Range("C14").Offset(i-1,0).Value = Time                   
+    Sheets("macro").Range("D14").Offset(i-1, 0).Value = ""
+    Sheets("macro").Range("E14").Offset(i - 1, 0). Value =   “pending”
+    Application.ScreenUpdating = False
+            
+    ' Define sheet's name
+    ' --------------------
+    workingsheet=Sheets("macro").Range("B14").Offset(i-1,0). 
+        value
+    workingsheet = LTrim(workingsheet)
+    Sheets(workingsheet).Activate
+            
+    ' Define variables
+    ' ----------------
+    Runno=Sheets("repdate").Range("I15").Offset(i-1,0).Value
+    count_index = Sheets(workingsheet).Range("A2").  Value
+        
+    ' Insert extraction formula in the first cell
+    ' -------------------------------------------
+    If Runno <> "" Then
+        Sheets(workingsheet).Range("E13").FormulaR1C1=     
+        "=IF(Start=0,0,IF(ISNUMBER(proj_result(R3C2,R4C2,RC3,
+        RC4,R5C2,R12C,R6C2)),proj_result(R3C2,R4C2,RC3,RC4,R5C2,R12C,R6C2),0))"
+        Sheets(workingsheet).Range("E13").Select
+        Selection.Copy
+
+        Select Case i
+
+        Case 1 To 3            
+          Sheets(workingsheet).Range("E13:AV"+Trim(Str(count_index))).Select
+        Case 4
+          Sheets(workingsheet).Range("E13:Ad"+Trim(Str(count_index))).Select
+        Case 5
+          Sheets(workingsheet).Range("E13:G"+Trim(Str(count_index))).Select
+  
+        End Select 
+        
+        Selection.PasteSpecial, Paste:=xlFormulas, Operation:=xlNone, SkipBlanks:=False,Transpose:=False       
+    End If
+
+Next
+    
+' Trigger extraction
+' -----------------
+Sheets("repdate").Range("I20").Value = 1
+        
+For j = 1 To 5
+
+    Application.ScreenUpdating = False
+    workingsheet=Sheets("macro").Range("B14").Offset(j-1,0).Value
+    workingsheet = LTrim(workingsheet)
+    count_index = Sheets(workingsheet).Range("A2").Value
+    Sheets(workingsheet).Activate
+            
+    ' Paste value extraction results
+    ' ------------------------------
+    If Runno <> "" Then
+        
+	Sheets(workingsheet).Activate  
+
+        Select Case j
+
+        Case 1 To 3
+        Sheets(workingsheet).Range("E13:AV"+Trim(Str(count_index))) .Select
+
+        Case 4
+        Sheets(workingsheet).Range("E13:Ad"+Trim(Str(count_index))).Select
+
+        Case 5
+        Sheets(workingsheet).Range("E13:G"+Trim(Str(count_index))). Select          
+
+        End Select
+
+        Selection.Copy
+        Selection.PasteSpecial Paste:=xlValues, Operation:=xlNone,     SkipBlanks:= False, Transpose:=False         
+    End If
+                    
+    ' Update extraction status
+    ' ------------------------
+    Application.ScreenUpdating = True
+    Sheets("macro").Activate
+    Sheets("macro").Range("D14").Offset(j-1,0).Value = Time 
+    Sheets("macro").Range("E14").Offset(j - 1, 0).Value =  “Completed”
+    Application.ScreenUpdating = False    
+Next
+    
+Application.ScreenUpdating = True
+Sheets("SummExtraction_HS").EnableCalculation = True
+Sheets("SummExtraction_IL").EnableCalculation = True
+Sheets("SummExt_IL_SPSource code").EnableCalculation = True
+
+End Sub
+

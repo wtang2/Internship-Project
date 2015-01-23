@@ -1,0 +1,118 @@
+'*************************************************************************************************************
+'Objective: Allow users to make "sent version", which is in a 'separate pasted-value format file, by just 
+'clicking a button. 'Users just need to input file 'location and file name if necessary
+'************************************************************************************************************
+
+Private Sub CommandButton1_Click()
+            
+' To add Start Time
+' ----------------------
+Sheets("repdate").Range("E10").Value = Time()
+Application.ScreenUpdating = False
+
+' Define variables
+' -------------------
+Dim Bonusrule, Source, Source_Name, Bonustype, Source_Dir, Output, Polno, Output_Dir, Output_Name As String
+Dim count_polno As Integer
+
+' Define variable for total number of records
+' ----------------------------------------------------
+count_polno = Worksheets("Repdate").Range("K10").Value()
+
+' Clear contents of the defined cell range
+' -----------------------------------------------
+Worksheets("Input").Range("O5:O994").ClearContents
+
+' Do Looping until the last record
+' --------------------------------------
+For i = 1 To count_polno
+    
+    ' Read in the policy information from this workbook
+    ' -------------------------------------------------------------
+    Bonustype = Worksheets("input").Range("j5").Offset(i - 1, 0).Value
+    Bonusrule = Worksheets("input").Range("c5").Offset(i - 1, 0).Value
+    smoker = Worksheets("Input").Range("G5").Offset(i - 1, 0).Value
+    
+    Polno = Worksheets("Input").Range("b5").Offset(i - 1, 0).Value
+    If smoker = "N" Then
+        Smoker_name = "Non-smoker"
+    End If
+
+    If smoker = "S" Then
+        Smoker_name = "Smoker"
+    End If
+        
+    ' Read in the source file location from this workbook
+    ' -------------------------------------------------------------
+    Source_Name = "Bonuscal_template_" + Bonustype + "_" + Bonusrule + ".xls"
+    Source_Dir = Worksheets("Repdate").Range("E8").Value
+    Source = Source_Dir + Source_Name
+    
+    ' Search the source file
+    ' -------------------------
+    Set fs = Application.FileSearch
+    With fs
+        .Filename = Source_Name
+        .LookIn = Source_Dir
+            
+    'Return succesful(S) status, show the status bar and open the successfully found source files
+    ' --------------------------------------------------------------------------------------------------------
+    If .Execute > 0 Then
+        Application.ScreenUpdating = True
+        Sheets("input").Range("o5").Offset(i - 1).Value = "S"
+        Application.StatusBar = "Opening file " & Source_Name
+        Application.ScreenUpdating = False
+        Workbooks.Open Source
+            
+        ' Input the policy information to the source file
+        ' ------------------------------------------------------
+        Worksheets("repdate").Range("e7").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("k5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("f7").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("l5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g7").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("m5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g14").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("d5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g15").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("e5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g16").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("f5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g17").Value = Smoker_name
+        Worksheets("repdate").Range("g11").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("b5").Offset(i - 1, 0).Value
+        Worksheets("repdate").Range("g13").Value = Workbooks(ThisWorkbook.Name). Worksheets("Input").Range("n5").Offset(i - 1, 0).Value
+        
+        ' Read in the output file location from this workbook
+        ' ---------------------------------------------------------------
+        Output_Name = "Bonuscal_template_" + Bonustype + "_" + Bonusrule + "_"+ Polno + ".xls"
+        Output_Dir = Workbooks(ThisWorkbook.Name).Worksheets("Repdate").Range("E9"). Value
+        Output = Output_Dir + Output_Name
+                    
+        ' Save the source file as a new workbook
+        ' ------------------------------------------------
+        Application.StatusBar = "Saving file " & Source_Name & " as a new workbook"
+        ActiveWorkbook.SaveAs Filename:=Output,_FileFormat:=xlNormal, _Password:="", _
+            WriteResPassword:="", _ReadOnlyRecommended:=False, _CreateBackup:=False
+                    
+        ' Close the source file
+        ' -------------------------
+        ActiveWorkbook.Close
+            
+    ' Return failure(F) status for files that are unsuccessfully found & show the status bar
+    ' ---------------------------------------------------------------------------------Else     	
+        Application.ScreenUpdating = True
+        Sheets("input").Range("o5").Offset(i - 1).Value = "F"
+        Application.StatusBar = "File " & Source_Name & "not found"
+        Application.ScreenUpdating = False
+            	
+    End If
+    End With
+
+Next
+      
+' To add end time & show the status bar for the total number of sucessful records
+' -------------------------------------------------------------------------------------
+Application.ScreenUpdating = True
+
+If Workbooks(ThisWorkbook.Name).Worksheets("Repdate").Range("E13").Value = "0" Then
+    Application.StatusBar = "Congratulation, all the files are completed"
+Else
+    Application.StatusBar = Workbooks(ThisWorkbook.Name).Worksheets("Repdate").Range("E12"). Value & " of " & count_polno & " files are completed"
+    Sheets("repdate").Range("E11").Value = Time()
+End If
+
+End Sub
